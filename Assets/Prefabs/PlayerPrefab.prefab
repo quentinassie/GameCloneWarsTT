@@ -1,0 +1,122 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &4272075636727267161
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 5079142103851997072}
+  - component: {fileID: 5754719014315487393}
+  - component: {fileID: 417843755769103632}
+  - component: {fileID: 3692326472737151331}
+  m_Layer: 0
+  m_Name: PlayerPrefab
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &5079142103851997072
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4272075636727267161}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 995.1081, y: 456.0054, z: -21.707767}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &5754719014315487393
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4272075636727267161}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9b91ecbcc199f4492b9a91e820070131, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  sceneId: 0
+  _assetId: 3391906629
+  serverOnly: 0
+  visibility: 0
+  hasSpawned: 0
+--- !u!114 &417843755769103632
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4272075636727267161}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8ff3ba0becae47b8b9381191598957c8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  syncDirection: 1
+  syncMode: 0
+  syncInterval: 0
+  target: {fileID: 5079142103851997072}
+  syncPosition: 1
+  syncRotation: 1
+  syncScale: 0
+  onlySyncOnChange: 1
+  compressRotation: 1
+  interpolatePosition: 1
+  interpolateRotation: 1
+  interpolateScale: 1
+  coordinateSpace: 0
+  timelineOffset: 1
+  showGizmos: 0
+  showOverlay: 0
+  overlayColor: {r: 0, g: 0, b: 0, a: 0.5}
+  onlySyncOnChangeCorrectionMultiplier: 2
+  useFixedUpdate: 0
+  rotationSensitivity: 0.01
+  positionPrecision: 0.01
+  scalePrecision: 0.01
+--- !u!114 &3692326472737151331
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4272075636727267161}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e83532ac119b4974c8aac31fd9f51d63, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  syncDirection: 0
+  syncMode: 0
+  syncInterval: 0
+  PlayerArea: {fileID: 0}
+  EnemyArea: {fileID: 0}
+  Canvas: {fileID: 0}
+  backCardPrefab: {fileID: 5305778083515227010, guid: 2f1c2e2477fb32d4aaf14d2d18d5630a, type: 3}
+  cardPrefabs:
+  - {fileID: 2831213408923046023, guid: 2549775ff87aa984b9e5bd79b3f83008, type: 3}
+  - {fileID: 6352421848613949442, guid: acf04a442db98be4ba5a9e9c1dd329e6, type: 3}
+  - {fileID: 8686905258471814233, guid: e5f7d588d71fd9e47aa9af231f3f72d5, type: 3}
+  - {fileID: 6765102648934758065, guid: 29869dfd7077b204980939124b57b807, type: 3}
+  - {fileID: 6624962366888393029, guid: 36a9e233a790001468e13947e637ce13, type: 3}
+  - {fileID: 7694938163294606343, guid: 996e95edd37bf8f46a8c2c53cffc7b12, type: 3}
+  buttonsSkillsPrefabs:
+  - {fileID: 5131002000467017062, guid: c32372455485ede48bb9d3af5c8e29cc, type: 3}
+  - {fileID: 3328821493809741224, guid: 87a54c268a8b5a245bbf4538604cd0bc, type: 3}
+  - {fileID: 7254013983259356496, guid: 176a6694ddda8ec4ab1fb10d3f4da275, type: 3}
+  - {fileID: 8998722232570192749, guid: b49ca75ce72102143b414162dea363ac, type: 3}
+  - {fileID: 1468400207790617799, guid: a3ce1fe35a4d4454e96484fff7f5653b, type: 3}
+  - {fileID: 213282651772136139, guid: 3b1bf31df5f803d4e934c0416567ee9c, type: 3}
+  instantiatedCard: []
+  myTurn: 0
