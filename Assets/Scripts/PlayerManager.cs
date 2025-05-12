@@ -12,6 +12,7 @@ public class PlayerManager : NetworkBehaviour
     public GameObject EnemyArea;
     public GameObject Canvas;
     public GameObject backCardPrefab;
+    public GameObject ButtonLeaveClient;
 
     public List<string> cardPrefabNames = new List<string>
 {
@@ -160,12 +161,12 @@ public class PlayerManager : NetworkBehaviour
             return;
         }
 
-        if (netId == 5)
+        if (netId == 6)
         {
             deckIndex = new List<int>(indices[0]);
         }
 
-        if (netId == 6)
+        if (netId == 7)
         {
             deckIndex = new List<int>(indices[1]);
         }
@@ -173,6 +174,22 @@ public class PlayerManager : NetworkBehaviour
     }
 
 
+    [Command]
+    public void CmdShutdownServer()
+    {
+        Debug.Log("Arrêt du serveur initié depuis un client.");
+
+        GameManager.instance.weHaveLooser = true;
+        GameManager.instance.begin = true;
+        GameManager.instance.RpcDestroyButtonsAll();
+        RpcDestroyInstantiedCard();
+        RpcCleanBack();
+        RpcResetBG();
+        RpcResetMyTurn();
+        RpcCleanLocalPlayer();
+
+        StartCoroutine(DelayedStopHost());
+    }
 
     public override void OnStartClient()
     {
@@ -180,11 +197,11 @@ public class PlayerManager : NetworkBehaviour
         PlayerArea = GameObject.FindWithTag("PlayerArea");
         EnemyArea = GameObject.FindWithTag("EnemyArea");
         Canvas = GameObject.FindWithTag("MainCanvas");
+        ButtonLeaveClient = GameObject.FindWithTag("ButtonLeaveClient");
         playersByNetId[netId] = this;
         fadeBGTurn = FindObjectOfType<FadeBackgroundOnTurn>();
         fadeBGTurn.ResetBG();
         SendDeck();
-
     }
 
     public override void OnStopClient()
@@ -232,10 +249,11 @@ public class PlayerManager : NetworkBehaviour
         }
     }
 
-    public void CleanupPlayer()
+    public void CleanupLocalPlayer()
     {
         instantiatedCard.Clear();
-        deckIndex.Clear();
+        myTurn = false;
+        DestroySkillsButtons();
         Resources.UnloadUnusedAssets();
 
     }
@@ -292,8 +310,8 @@ public class PlayerManager : NetworkBehaviour
         GameObject prefab = LoadCardPrefabByIndex(deckIndex[deckIndex.Count - 1]);
         GameObject card = Instantiate(prefab, new Vector2(0, 0), Quaternion.identity);
         NetworkServer.Spawn(card, connectionToClient);
-        card.GetComponent<Card>().SetParameters();
         instantiatedCard.Add(card);
+        card.GetComponent<Card>().SetParameters();
 
         RpcShowCard(card, "Dealt");
 
@@ -378,6 +396,23 @@ public class PlayerManager : NetworkBehaviour
         myTurn = false;
     }
 
+    [ClientRpc]
+    void RpcCleanLocalPlayer()
+    {
+        CleanupLocalPlayer();
+    }
+
+    [ClientRpc]
+    void RpcDestroyInstantiedCard()
+    {
+        if (instantiatedCard.Count > 0)
+        {
+            GameObject card = instantiatedCard[0];
+            instantiatedCard.RemoveAt(0);
+            NetworkServer.Destroy(card);
+        }
+    }
+
 
     [Command]
     public void CmdDestroyLastCard()
@@ -399,12 +434,12 @@ public class PlayerManager : NetworkBehaviour
         if (deckIndex.Count == 0)
         {
             GameManager.instance.weHaveLooser = true;
-            GameManager.instance.RpcDestroyButtonsAll();
             GameManager.instance.begin = true;
+            GameManager.instance.RpcDestroyButtonsAll();
             RpcCleanBack();
             RpcResetBG();
             RpcResetMyTurn();
-            CleanupPlayer();
+            CleanupLocalPlayer();
             return;
         }
         SpawnAndShowCardSafe(netId);
@@ -430,7 +465,7 @@ public class PlayerManager : NetworkBehaviour
         if (deckIndex.Count == cardPrefabNames.Count)
         {
             GameManager.instance.weHaveLooser = true;
-            CleanupPlayer();
+            CleanupLocalPlayer();
             return;
         }
         SpawnAndShowCardSafe(netId);
@@ -451,8 +486,8 @@ public class PlayerManager : NetworkBehaviour
         GameObject prefab = LoadCardPrefabByIndex(lastCardIndex);
         GameObject card = Instantiate(prefab, new Vector2(0, 0), Quaternion.identity);
         NetworkServer.Spawn(card, player.connectionToClient);
-        card.GetComponent<Card>().SetParameters();
         player.instantiatedCard.Add(card);
+        card.GetComponent<Card>().SetParameters();
         StartCoroutine(DelayedRpcShowCard(player, card));
     }
 
@@ -464,9 +499,10 @@ public class PlayerManager : NetworkBehaviour
         player.AddValuesToDictionnary();
     }
 
-    private IEnumerator DelayedWeHaveLooser(uint netid)
+    private IEnumerator DelayedStopHost()
     {
-        yield return null;
-        SpawnAndShowCardSafe(netid);
+        yield return new WaitForSeconds(0.5f);
+        NetworkManager.singleton.StopHost();
     }
+
 }
