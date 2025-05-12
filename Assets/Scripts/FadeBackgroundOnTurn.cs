@@ -62,6 +62,8 @@ public class FadeBackgroundOnTurn : MonoBehaviour
         if (fadeCoroutine != null)
             StopCoroutine(fadeCoroutine);
 
+        Debug.Log($"[FadeBG] reset bg by");
+
         SetAlpha(playerBG, 0f);
         SetAlpha(enemyBG, 0f);
         SetAlpha(background1, 1f);

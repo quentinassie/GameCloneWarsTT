@@ -9,6 +9,7 @@ TagManager:
   - EnemyArea
   - ButtonCourage
   - Back
+  - ButtonLeaveClient
   layers:
   - Default
   - TransparentFX
