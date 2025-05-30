@@ -104,13 +104,16 @@ MonoBehaviour:
   EnemyArea: {fileID: 0}
   Canvas: {fileID: 0}
   backCardPrefab: {fileID: 5305778083515227010, guid: 2f1c2e2477fb32d4aaf14d2d18d5630a, type: 3}
-  cardPrefabs:
-  - {fileID: 2831213408923046023, guid: 2549775ff87aa984b9e5bd79b3f83008, type: 3}
-  - {fileID: 6352421848613949442, guid: acf04a442db98be4ba5a9e9c1dd329e6, type: 3}
-  - {fileID: 8686905258471814233, guid: e5f7d588d71fd9e47aa9af231f3f72d5, type: 3}
-  - {fileID: 6765102648934758065, guid: 29869dfd7077b204980939124b57b807, type: 3}
-  - {fileID: 6624962366888393029, guid: 36a9e233a790001468e13947e637ce13, type: 3}
-  - {fileID: 7694938163294606343, guid: 996e95edd37bf8f46a8c2c53cffc7b12, type: 3}
+  ButtonLeaveClient: {fileID: 0}
+  text_choisit: {fileID: 8400350656466161523, guid: 0c700a3d673ae17449643d81c413103b, type: 3}
+  LightLine: {fileID: 0}
+  cardPrefabNames:
+  - MaceWindu
+  - Ziro
+  - Rancor
+  - MagnaGuard
+  - Yoda
+  - NuteGunray
   buttonsSkillsPrefabs:
   - {fileID: 5131002000467017062, guid: c32372455485ede48bb9d3af5c8e29cc, type: 3}
   - {fileID: 3328821493809741224, guid: 87a54c268a8b5a245bbf4538604cd0bc, type: 3}

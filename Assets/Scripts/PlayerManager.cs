@@ -14,6 +14,8 @@ public class PlayerManager : NetworkBehaviour
     public GameObject backCardPrefab;
     public GameObject ButtonLeaveClient;
 
+    public GameObject LightLine;
+
     public List<string> cardPrefabNames = new List<string>
 {
     "MaceWindu",
@@ -42,7 +44,10 @@ public class PlayerManager : NetworkBehaviour
     public static Dictionary<uint, PlayerManager> playersByNetId = new();
 
     //UI
-    private FadeBackgroundOnTurn fadeBGTurn;
+    private Color32 targetColor = new Color32(0x6B, 0xFF, 0x51, 0xD7); //green
+    private Color32 targetColor2 = new Color32(255, 62, 98, 215);
+
+
 
 
     GameObject LoadCardPrefabByIndex(int index)
@@ -122,7 +127,6 @@ public class PlayerManager : NetworkBehaviour
     }
 
 
-
     public void AddSkillValue(uint netId, string skill, int value)
     {
         if (!skillValues.ContainsKey(netId))
@@ -157,7 +161,6 @@ public class PlayerManager : NetworkBehaviour
     {
         if (indices.Count < 1)
         {
-            Debug.LogError("[SendDeck] Indices not initialized. Aborting.");
             return;
         }
 
@@ -184,7 +187,7 @@ public class PlayerManager : NetworkBehaviour
         GameManager.instance.RpcDestroyButtonsAll();
         RpcDestroyInstantiedCard();
         RpcCleanBack();
-        RpcResetBG();
+        //RpcResetBG();
         RpcResetMyTurn();
         RpcCleanLocalPlayer();
 
@@ -198,9 +201,10 @@ public class PlayerManager : NetworkBehaviour
         EnemyArea = GameObject.FindWithTag("EnemyArea");
         Canvas = GameObject.FindWithTag("MainCanvas");
         ButtonLeaveClient = GameObject.FindWithTag("ButtonLeaveClient");
+        LightLine = GameObject.FindWithTag("LIGHT_LINE");
+
+
         playersByNetId[netId] = this;
-        fadeBGTurn = FindObjectOfType<FadeBackgroundOnTurn>();
-        fadeBGTurn.ResetBG();
         SendDeck();
     }
 
@@ -253,7 +257,9 @@ public class PlayerManager : NetworkBehaviour
     {
         instantiatedCard.Clear();
         myTurn = false;
+        Debug.Log(">>> CleanupLocalPlayer lancé");
         DestroySkillsButtons();
+
         Resources.UnloadUnusedAssets();
 
     }
@@ -300,8 +306,9 @@ public class PlayerManager : NetworkBehaviour
 
         Debug.Log($"[TargetActivateButton] netId: {netId}, myTurn: {myTurn}, isOwned: {GetComponent<NetworkIdentity>().isOwned}");
 
-        fadeBGTurn.SetTurn(myTurn);
+        //fadeBGTurn.SetTurn(myTurn);
     }
+
 
     [Command]
     public void CmdDealsCards()
@@ -318,10 +325,8 @@ public class PlayerManager : NetworkBehaviour
         var ordered = playersByNetId.Values.OrderBy(p => p.connectionToClient.connectionId).ToList();
         int myIndex = ordered.IndexOf(this);
         bool isMyTurn = (starter == myIndex);
-        //myTurn = isMyTurn;
         TargetSetMyTurn(connectionToClient, isMyTurn);
         TargetActivateButton(connectionToClient);
-
         AddValuesToDictionnary();
     }
 
@@ -349,12 +354,14 @@ public class PlayerManager : NetworkBehaviour
         {
             myTurn = true;
             CmdUpdateAfterWin(indexlostcard);
+            LightLine.GetComponent<HexFill>().StartHexFillSequence(targetColor);
 
         }
         else
         {
             myTurn = false;
             CmdDestroyLastCard();
+            LightLine.GetComponent<HexFill>().StartHexFillSequence(targetColor2);
 
         }
     }
@@ -363,6 +370,7 @@ public class PlayerManager : NetworkBehaviour
     public void DestroySkillsButtons()
     {
         if (buttonsSkillsPrefabInstances == null) return;
+        Debug.Log($"execution de DestroyButtons{isLocalPlayer}");
         foreach (var prefab in buttonsSkillsPrefabInstances)
             Destroy(prefab);
         buttonsSkillsPrefabInstances.Clear();
@@ -384,13 +392,6 @@ public class PlayerManager : NetworkBehaviour
     }
 
     [ClientRpc]
-    void RpcResetBG()
-    {
-        fadeBGTurn.ResetBG();
-    }
-
-
-    [ClientRpc]
     void RpcResetMyTurn()
     {
         myTurn = false;
@@ -399,6 +400,13 @@ public class PlayerManager : NetworkBehaviour
     [ClientRpc]
     void RpcCleanLocalPlayer()
     {
+        CleanupLocalPlayer();
+    }
+
+    [TargetRpc]
+    public void TargetDoCleanup(NetworkConnection target)
+    {
+        Debug.Log(" Cleanup appelé via TargetRpc");
         CleanupLocalPlayer();
     }
 
@@ -435,11 +443,8 @@ public class PlayerManager : NetworkBehaviour
         {
             GameManager.instance.weHaveLooser = true;
             GameManager.instance.begin = true;
-            GameManager.instance.RpcDestroyButtonsAll();
             RpcCleanBack();
-            RpcResetBG();
-            RpcResetMyTurn();
-            CleanupLocalPlayer();
+            TargetDoCleanup(connectionToClient);
             return;
         }
         SpawnAndShowCardSafe(netId);
@@ -465,7 +470,7 @@ public class PlayerManager : NetworkBehaviour
         if (deckIndex.Count == cardPrefabNames.Count)
         {
             GameManager.instance.weHaveLooser = true;
-            CleanupLocalPlayer();
+            TargetDoCleanup(connectionToClient);
             return;
         }
         SpawnAndShowCardSafe(netId);
@@ -482,21 +487,23 @@ public class PlayerManager : NetworkBehaviour
         }
 
         PlayerManager player = playersByNetId[netid];
+        PlayerManager otherPlayer = playersByNetId.First(p => p.Key != netid).Value;
         int lastCardIndex = player.deckIndex[player.deckIndex.Count - 1];
         GameObject prefab = LoadCardPrefabByIndex(lastCardIndex);
         GameObject card = Instantiate(prefab, new Vector2(0, 0), Quaternion.identity);
         NetworkServer.Spawn(card, player.connectionToClient);
         player.instantiatedCard.Add(card);
         card.GetComponent<Card>().SetParameters();
-        StartCoroutine(DelayedRpcShowCard(player, card));
+        StartCoroutine(DelayedRpcShowCard(player, netid, card));
     }
 
-    private IEnumerator DelayedRpcShowCard(PlayerManager player, GameObject card)
+    private IEnumerator DelayedRpcShowCard(PlayerManager player, uint netid, GameObject card)
     {
         yield return null;
         player.RpcShowCard(card, "Dealt");
         player.TargetActivateButton(player.connectionToClient);
         player.AddValuesToDictionnary();
+
     }
 
     private IEnumerator DelayedStopHost()
