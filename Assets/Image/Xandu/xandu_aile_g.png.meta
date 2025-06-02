@@ -106,67 +106,47 @@ TextureImporter:
     ignorePlatformSupport: 0
     androidETC2FallbackOverride: 0
     forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 3
+    buildTarget: Windows Store Apps
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
   spriteSheet:
     serializedVersion: 2
     sprites: []
     outline:
-    - - {x: 175, y: 283}
-      - {x: 166, y: 292}
-      - {x: 149, y: 313}
-      - {x: 143, y: 314}
-      - {x: 141, y: 311}
-      - {x: 143, y: 306}
-      - {x: 158, y: 266}
-      - {x: 165, y: 229}
-      - {x: 164, y: 202}
-      - {x: 164, y: 188}
-      - {x: 154, y: 201}
-      - {x: 146, y: 205}
-      - {x: 141, y: 203}
-      - {x: 136, y: 195}
-      - {x: 140, y: 188}
-      - {x: 149, y: 182}
-      - {x: 157, y: 181}
-      - {x: 159, y: 179}
-      - {x: 148, y: 166}
-      - {x: 111, y: 137}
-      - {x: 51, y: 87}
-      - {x: 38, y: 73}
-      - {x: 38.037598, y: 66.605225}
-      - {x: 32, y: 57}
-      - {x: 29, y: 50}
-      - {x: 24, y: 44}
-      - {x: 13, y: 32}
-      - {x: 17, y: 25}
-      - {x: 17, y: 13}
-      - {x: 20, y: 12}
-      - {x: 12, y: 1}
-      - {x: 20, y: 3}
-      - {x: 29, y: 0}
-      - {x: 31, y: -2}
-      - {x: 31, y: -6}
-      - {x: 31, y: -14}
-      - {x: 24, y: -22}
-      - {x: 31, y: -25}
-      - {x: 41, y: -12}
-      - {x: 43, y: -3}
-      - {x: 41, y: 6}
-      - {x: 48, y: 9}
-      - {x: 61, y: 4}
-      - {x: 76, y: 3}
-      - {x: 86, y: 10}
-      - {x: 120, y: 54}
-      - {x: 154, y: 88}
-      - {x: 190, y: 112}
-      - {x: 214, y: 121}
-      - {x: 218, y: 121}
-      - {x: 226, y: 119}
-      - {x: 225, y: 122}
-      - {x: 216, y: 139}
-      - {x: 209, y: 162}
-      - {x: 202, y: 193}
-      - {x: 193, y: 234}
-      - {x: 181, y: 269}
+    - - {x: 229, y: 111}
+      - {x: 229, y: 132}
+      - {x: 187, y: 269}
+      - {x: 170, y: 296}
+      - {x: 151, y: 317}
+      - {x: 142, y: 317}
+      - {x: 137, y: 315}
+      - {x: 139, y: 307}
+      - {x: 135, y: 275}
+      - {x: 141, y: 246}
+      - {x: 136, y: 231}
+      - {x: 134, y: 214}
+      - {x: 124, y: 180}
+      - {x: 98, y: 161}
+      - {x: 28, y: 107}
+      - {x: 8, y: 40}
+      - {x: 8, y: -5}
+      - {x: 23, y: -29}
+      - {x: 48, y: -41}
+      - {x: 121, y: -41}
+    - - {x: 19, y: 27}
+      - {x: 19, y: 28}
+      - {x: 21, y: 30}
+      - {x: 20.166672, y: 25.833328}
     physicsShape: []
     bones: []
     spriteID: 5e97eb03825dee720800000000000000
