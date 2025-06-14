@@ -14,6 +14,7 @@ GameObject:
   - component: {fileID: -4621808150972712318}
   - component: {fileID: -2144934193190434425}
   - component: {fileID: 7951820400487924699}
+  - component: {fileID: 8716471047459671425}
   m_Layer: 0
   m_Name: PlayerArea
   m_TagString: PlayerArea
@@ -61,16 +62,16 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 0.5882353}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: be3167a743ae0854ba6a61cc505b4d01, type: 3}
+  m_Sprite: {fileID: -7614270963478610855, guid: 25ca0f8c6a1cc0e4891669c9503a7092, type: 3}
   m_Type: 0
-  m_PreserveAspect: 0
+  m_PreserveAspect: 1
   m_FillCenter: 1
   m_FillMethod: 4
   m_FillAmount: 1
@@ -153,3 +154,18 @@ MonoBehaviour:
   rotationSensitivity: 0.01
   positionPrecision: 0.01
   scalePrecision: 0.01
+--- !u!114 &8716471047459671425
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9202210938861986074}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8ead80b16feb64c4b9dd07cea7e356ab, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  oscillationSpeed: 0.5
+  minAlpha: 0.4
+  maxAlpha: 1
