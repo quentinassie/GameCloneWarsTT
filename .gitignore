@@ -42,3 +42,5 @@ Assets/AssetStoreTools*
 
 # Exclude builds or custom folders
 Build/
+Built/
+
