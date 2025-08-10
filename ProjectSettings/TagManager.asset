@@ -13,6 +13,14 @@ TagManager:
   - LIGHT_LINE
   - TEXT_CHOISIT
   - DROID_ARM
+  - FLUID
+  - TEXT_VALUE
+  - ROOF
+  - DropZone
+  - SPEECH_BUBBLE
+  - HEX_PLAYER
+  - HEX_ENEMY
+  - TEXT_EFFECTS
   layers:
   - Default
   - TransparentFX

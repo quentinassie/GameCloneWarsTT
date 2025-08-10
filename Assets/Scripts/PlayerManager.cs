@@ -4,6 +4,8 @@ using UnityEngine;
 using Mirror;
 using System.Linq;
 using UnityEngine.UI;
+using TMPro;
+using System.Text.RegularExpressions;
 
 public class PlayerManager : NetworkBehaviour
 {
@@ -14,7 +16,16 @@ public class PlayerManager : NetworkBehaviour
     public GameObject backCardPrefab;
     public GameObject ButtonLeaveClient;
 
-    public GameObject LightLine;
+    private GameObject roof;
+
+    private GameObject LightLine;
+    private GameObject Fluid;
+    private GameObject HexPlayer;
+    private GameObject HexEnemy;
+    private TMP_Text messageText;
+    public TMP_Text speechBubbleText;
+    public SpeechBubbleUI speechBubbleUI;
+    private GameObject textEffects;
 
     public List<string> cardPrefabNames = new List<string>
 {
@@ -44,7 +55,8 @@ public class PlayerManager : NetworkBehaviour
     public static Dictionary<uint, PlayerManager> playersByNetId = new();
 
     //UI
-    private Color32 targetColor = new Color32(0x6B, 0xFF, 0x51, 0xD7); //green
+    private Color32 targetColor = new Color32(0x00, 0x8D, 0xFF, 0xD7); // bleu ciel (#008DFF)
+
     private Color32 targetColor2 = new Color32(255, 62, 98, 215);
 
 
@@ -111,20 +123,61 @@ public class PlayerManager : NetworkBehaviour
 
         ClearSkillButtons();
 
+        messageText = GameObject.FindWithTag("TEXT_VALUE").GetComponent<TMP_Text>();
+        if (messageText == null)
+            Debug.LogError($"[OnStartClient] Could not find TMP_Text with tag TEXT_VALUE {netId}");
+
         foreach (GameObject prefab in buttonsSkillsPrefabs)
         {
             if (prefab == null) continue;
 
             GameObject btnObj = Instantiate(prefab, Canvas.transform);
             Button btn = btnObj.GetComponent<Button>();
+            buttonsSkillsPrefabInstances.Add(btnObj);
+
+
+            roof = GameObject.FindWithTag("ROOF");
+            if (roof != null)
+            {
+                int roofIndex = roof.transform.GetSiblingIndex();
+                btnObj.transform.SetSiblingIndex(roofIndex);
+            }
 
             string skillName = prefab.name.Replace("Button", "").Replace("(Clone)", "");
-            btn.onClick.AddListener(() => CmdPlayTurn(skillName));
+
+            var hoverHandler = btnObj.AddComponent<SkillHoverHandler>();
+            hoverHandler.skillName = skillName;
+            hoverHandler.playerManager = playersByNetId[netId];
+            hoverHandler.messageText = messageText;
+
+            btn.onClick.AddListener(() =>
+            {
+                hoverHandler.ClearMessage();
+                CmdPlayTurn(skillName);
+            });
 
             btnObj.SetActive(false);
-            buttonsSkillsPrefabInstances.Add(btnObj);
         }
     }
+
+
+    public int GetSkillValueFromCard(PlayerManager player, string skill)
+    {
+        //Debug.Log($"netid{player.netId}[GetSkillValueFromCard] Nombre d'éléments dans instantiatedCard: {player.instantiatedCard.Count}");
+        GameObject card = player.instantiatedCard[0];
+        card.GetComponent<Card>().SetParameters();
+        return skill switch
+        {
+            "Courage" => card.GetComponent<Card>().GetCourage(),
+            "Ruse" => card.GetComponent<Card>().GetRuse(),
+            "Autorite" => card.GetComponent<Card>().GetAutorite(),
+            "AptitudeAuCombat" => card.GetComponent<Card>().GetAptitudeAuCombat(),
+            "TechniquesDeCombat" => card.GetComponent<Card>().GetTechniquesDeCombat(),
+            "PouvoirJedi" => card.GetComponent<Card>().GetPouvoirJedi(),
+            _ => 0
+        };
+    }
+
 
 
     public void AddSkillValue(uint netId, string skill, int value)
@@ -137,6 +190,7 @@ public class PlayerManager : NetworkBehaviour
 
     public void AddValuesToDictionnary()
     {
+        //Debug.Log($"netid{netId}[AddValuesToDictionnary] Nombre d'éléments dans instantiatedCard: {instantiatedCard.Count}");
         GameObject card = instantiatedCard[0];
 
         AddSkillValue(netId, "Courage", card.GetComponent<Card>().GetCourage());
@@ -153,7 +207,7 @@ public class PlayerManager : NetworkBehaviour
         GameObject back = Instantiate(backCardPrefab, new Vector2(0, 0), Quaternion.identity);
         back.tag = "Back";
         back.transform.SetParent(EnemyArea.transform, false);
-        Debug.Log($"[ShowBack] isServer: {isServer} | isClient: {isClient} | isLocalPlayer: {isLocalPlayer}");
+        //Debug.Log($"[ShowBack] isServer: {isServer} | isClient: {isClient} | isLocalPlayer: {isLocalPlayer}");
 
     }
 
@@ -173,7 +227,7 @@ public class PlayerManager : NetworkBehaviour
         {
             deckIndex = new List<int>(indices[1]);
         }
-        Debug.Log($"[SendDeck] netId: {netId} assigned deck index: {string.Join(",", deckIndex)}");
+        //Debug.Log($"[SendDeck] netId: {netId} assigned deck index: {string.Join(",", deckIndex)}");
     }
 
 
@@ -187,7 +241,7 @@ public class PlayerManager : NetworkBehaviour
         GameManager.instance.RpcDestroyButtonsAll();
         RpcDestroyInstantiedCard();
         RpcCleanBack();
-        //RpcResetBG();
+        RpcCleanFluid();
         RpcResetMyTurn();
         RpcCleanLocalPlayer();
 
@@ -202,6 +256,12 @@ public class PlayerManager : NetworkBehaviour
         Canvas = GameObject.FindWithTag("MainCanvas");
         ButtonLeaveClient = GameObject.FindWithTag("ButtonLeaveClient");
         LightLine = GameObject.FindWithTag("LIGHT_LINE");
+        Fluid = GameObject.FindWithTag("FLUID");
+        HexPlayer = GameObject.FindWithTag("HEX_PLAYER");
+        HexEnemy = GameObject.FindWithTag("HEX_ENEMY");
+        textEffects = GameObject.FindWithTag("TEXT_EFFECTS");
+
+
 
 
         playersByNetId[netId] = this;
@@ -238,7 +298,7 @@ public class PlayerManager : NetworkBehaviour
     {
         base.OnStartServer();
 
-        Debug.Log($"begin value : {GameManager.instance.begin}");
+        //Debug.Log($"begin value : {GameManager.instance.begin}");
 
         if (GameManager.instance.begin)
         {
@@ -284,10 +344,52 @@ public class PlayerManager : NetworkBehaviour
                 }
             }
         }
-        else if (type == "Played")
+        else if (type == "Enemy")
         {
-            // À implémenter
+            if (!card.GetComponent<NetworkIdentity>().isOwned)
+            {
+                card.transform.SetParent(EnemyArea.transform, false);
+                card.GetComponent<DragDrop>().AnimationZoom(3f);
+            }
         }
+
+        else if (type == "EnemyWinner")
+        {
+            if (!card.GetComponent<NetworkIdentity>().isOwned)
+            {
+                card.transform.SetParent(EnemyArea.transform, false);
+                card.GetComponent<DragDrop>().AnimationZoom(10f);
+
+                // On s'assure que c'est bien un RectTransform
+                //RectTransform rect = instantiatedCard[0].GetComponent<RectTransform>();
+                //StartCoroutine(MoveCardToUI(rect, new Vector2(0f, 478f), 0.3f));
+            }
+        }
+        else if (type == "PlayerWinner")
+        {
+            if (!card.GetComponent<NetworkIdentity>().isOwned)
+            {
+                //RectTransform rect = card.GetComponent<RectTransform>();
+                //StartCoroutine(MoveCardToUI(rect, new Vector2(0f, -477.7f), 0.3f));
+            }
+        }
+
+    }
+
+    private IEnumerator MoveCardToUI(RectTransform cardRect, Vector2 targetAnchoredPos, float duration)
+    {
+        Vector2 startPos = cardRect.anchoredPosition;
+        float t = 0f;
+
+        while (t < duration)
+        {
+            t += Time.deltaTime;
+            float k = Mathf.SmoothStep(0f, 1f, t / duration); // mouvement plus doux
+            cardRect.anchoredPosition = Vector2.Lerp(startPos, targetAnchoredPos, k);
+            yield return null;
+        }
+
+        cardRect.anchoredPosition = targetAnchoredPos;
     }
 
 
@@ -295,7 +397,7 @@ public class PlayerManager : NetworkBehaviour
     void TargetSetMyTurn(NetworkConnection target, bool isMyTurn)
     {
         myTurn = isMyTurn;
-        Debug.Log($"[TargetSetMyTurn] Client received turn status: {myTurn}");
+        //Debug.Log($"[TargetSetMyTurn] Client received turn status: {myTurn}");
     }
 
     [TargetRpc]
@@ -304,16 +406,26 @@ public class PlayerManager : NetworkBehaviour
         foreach (GameObject prefab in buttonsSkillsPrefabInstances)
             prefab.SetActive(myTurn);
 
-        Debug.Log($"[TargetActivateButton] netId: {netId}, myTurn: {myTurn}, isOwned: {GetComponent<NetworkIdentity>().isOwned}");
+        //Debug.Log($"[TargetActivateButton] netId: {netId}, myTurn: {myTurn}, isOwned: {GetComponent<NetworkIdentity>().isOwned}");
 
         //fadeBGTurn.SetTurn(myTurn);
+
     }
+
+    [TargetRpc]
+    void TargetActivateFluid(NetworkConnection target)
+    {
+        Fluid.GetComponent<HoloTableDisplay>().SetHoloTable(myTurn);
+
+    }
+
+
 
 
     [Command]
     public void CmdDealsCards()
     {
-        Debug.Log($"[cmdDealsCard] executing cmddealscards{netId},{deckIndex}");
+        //Debug.Log($"[cmdDealsCard] executing cmddealscards{netId},{deckIndex}");
         GameObject prefab = LoadCardPrefabByIndex(deckIndex[deckIndex.Count - 1]);
         GameObject card = Instantiate(prefab, new Vector2(0, 0), Quaternion.identity);
         NetworkServer.Spawn(card, connectionToClient);
@@ -325,8 +437,11 @@ public class PlayerManager : NetworkBehaviour
         var ordered = playersByNetId.Values.OrderBy(p => p.connectionToClient.connectionId).ToList();
         int myIndex = ordered.IndexOf(this);
         bool isMyTurn = (starter == myIndex);
+
+        TargetSendInstantiatedCard(connectionToClient, card);
         TargetSetMyTurn(connectionToClient, isMyTurn);
         TargetActivateButton(connectionToClient);
+        TargetActivateFluid(connectionToClient);
         AddValuesToDictionnary();
     }
 
@@ -334,37 +449,180 @@ public class PlayerManager : NetworkBehaviour
     [Command]
     public void CmdPlayTurn(string skill)
     {
-
         var maxKey = skillValues.Aggregate((x, y) => x.Value[skill] > y.Value[skill] ? x : y).Key;
         var loserKey = playersByNetId.First(kvp => kvp.Key != maxKey).Key;
         int indexLostCard = playersByNetId[loserKey].deckIndex[playersByNetId[loserKey].deckIndex.Count - 1];
 
-        playersByNetId[maxKey].TargetResultOfTurn(playersByNetId[maxKey].connectionToClient, maxKey, indexLostCard);
-        playersByNetId[loserKey].TargetResultOfTurn(playersByNetId[loserKey].connectionToClient, maxKey, 0);
+        int valueWin = skillValues[maxKey][skill];
+        int valueLose = skillValues[loserKey][skill];
+
+        playersByNetId[maxKey].TargetResultOfTurn(playersByNetId[maxKey].connectionToClient, maxKey, indexLostCard, valueWin, valueLose, skill);
+        playersByNetId[loserKey].TargetResultOfTurn(playersByNetId[loserKey].connectionToClient, maxKey, 0, valueWin, valueLose, skill);
+
+        foreach (var kvp in playersByNetId)
+        {
+            kvp.Value.TargetShowBubble(kvp.Value.connectionToClient, $"{skill}");
+        }
 
         skillValues.Clear();
 
     }
 
+    [TargetRpc]
+    public void TargetShowBubble(NetworkConnection target, string message)
+    {
+        GameObject bubbleObj = GameObject.FindWithTag("SPEECH_BUBBLE");
+        if (bubbleObj == null)
+        {
+            Debug.LogWarning("⚠ UI bulle introuvable pour afficher le message : " + message);
+            return;
+        }
+
+        var speechBubbleUI = bubbleObj.GetComponent<SpeechBubbleUI>();
+        if (speechBubbleUI != null)
+        {
+            string formattedMessage = Regex.Replace(message, "(?<!^)([A-Z])", " $1").ToUpper();
+
+            speechBubbleUI.ShowMessage((netId - 5).ToString(), formattedMessage);
+        }
+        else
+        {
+            Debug.LogWarning("⚠ Le composant SpeechBubbleUI est manquant sur l'objet SPEECH_BUBBLE.");
+        }
+    }
+
+
 
     [TargetRpc]
-    void TargetResultOfTurn(NetworkConnection target, uint netid, int indexlostcard)
+    void TargetSendInstantiatedCard(NetworkConnection target, GameObject card)
+    {
+        int number = instantiatedCard.Count;
+        if (number != 0)
+        {
+            for (int i = 0; i < number; i++)
+            {
+                instantiatedCard.RemoveAt(i);
+            }
+        }
+        instantiatedCard.Add(card);
+    }
+
+    //Ajouts etincelles sur carte
+    //ajouter le deck sur le plateau?en petit a gauche
+    //ajuster texte xandu et tour de tete xandu
+    //ajout rouge sang fullscreen si peu de carte
+    //pouvoir : prendre un pari : tu paris que tu gagne les 2 cartes suivantes ?
+    //icone butin pour prendre la carte gagnée;
+
+    [TargetRpc]
+    void TargetResultOfTurn(NetworkConnection target, uint netid, int indexlostcard, int valueWin, int valueLose, string skill)
     {
         if (netId == netid)
+        {
+            StartCoroutine(InterfaceClean(true, indexlostcard, valueWin, valueLose, skill));
+        }
+        else
+        {
+            StartCoroutine(InterfaceClean(false, 0, valueWin, valueLose, skill));
+        }
+    }
+
+    private IEnumerator InterfaceClean(bool isWinner, int indexlostcard, int valueWin, int valueLose, string skill)
+    {
+        foreach (GameObject button in buttonsSkillsPrefabInstances)
+        {
+            if (button != null)
+                button.SetActive(false);
+        }
+
+        Fluid.GetComponent<HoloTableDisplay>().ShowResultColor();
+
+        //Annonce du skill chois
+        textEffects.GetComponent<TextEffects>().ShowSkillTextFive(skill);
+        yield return new WaitForSeconds(2f);
+
+        //HexPlayer.GetComponent<HexSequence>().StartHexFillSequence();
+
+        //maj de la valeur de la skill choisie 
+        if (isWinner)
+        {
+            textEffects.GetComponent<TextEffects>().AnimTextPlayer(valueWin);
+            yield return new WaitForSeconds(1.5f);
+        }
+        else if (!isWinner)
+        {
+            textEffects.GetComponent<TextEffects>().AnimTextPlayer(valueLose);
+            yield return new WaitForSeconds(1.5f);
+        }
+        //instantiatedCard[0].GetComponent<DragDrop>().AnimationZoom(3f);
+
+        //HexEnemy.GetComponent<HexSequence>().StartHexFillSequence();
+
+        //maj de la valeur choisie pour le enemy
+        if (isWinner)
+        {
+            textEffects.GetComponent<TextEffects>().AnimTextEnemy(valueLose);
+
+        }
+        else if (!isWinner)
+        {
+            textEffects.GetComponent<TextEffects>().AnimTextEnemy(valueWin);
+
+        }
+
+        CmdAnimateCard("Enemy");//animation zoom
+
+        yield return new WaitForSeconds(1.5f);
+
+        if (isWinner)
+        {
+            instantiatedCard[0].GetComponent<DragDrop>().AnimationZoom(10f);
+            //CmdAnimateCard("PlayerWinner");
+            yield return new WaitForSeconds(2f);
+
+        }
+        else if (!isWinner)
+        {
+            CmdAnimateCard("EnemyWinner");
+            yield return new WaitForSeconds(2f);
+        }
+
+        if (isWinner)
         {
             myTurn = true;
             CmdUpdateAfterWin(indexlostcard);
             LightLine.GetComponent<HexFill>().StartHexFillSequence(targetColor);
-
+            Fluid.GetComponent<HoloTableDisplay>().SetHoloTable(myTurn);
         }
         else
         {
             myTurn = false;
             CmdDestroyLastCard();
             LightLine.GetComponent<HexFill>().StartHexFillSequence(targetColor2);
-
+            Fluid.GetComponent<HoloTableDisplay>().SetHoloTable(myTurn);
         }
     }
+
+    [Command]
+    void CmdAnimateCard(string type)
+
+    {
+        PlayerManager opponent = playersByNetId.Values.FirstOrDefault(p => p.netId != netId);
+        GameObject card = opponent.instantiatedCard[0];
+        if (type == "Enemy")
+        {
+            RpcShowCard(card, "Enemy");
+        }
+        if (type == "EnemyWinner")
+        {
+            RpcShowCard(card, "EnemyWinner");
+        }
+        if (type == "PlayerWinner")
+        {
+            RpcShowCard(card, "PlayerWinner");
+        }
+    }
+
 
 
     public void DestroySkillsButtons()
@@ -395,6 +653,12 @@ public class PlayerManager : NetworkBehaviour
     void RpcResetMyTurn()
     {
         myTurn = false;
+    }
+
+    [ClientRpc]
+    void RpcCleanFluid()
+    {
+        Fluid.GetComponent<HoloTableDisplay>().SetHoloTable(true);
     }
 
     [ClientRpc]
@@ -502,7 +766,9 @@ public class PlayerManager : NetworkBehaviour
         yield return null;
         player.RpcShowCard(card, "Dealt");
         player.TargetActivateButton(player.connectionToClient);
+        //player.TargetActivateFluid(player.connectionToClient);
         player.AddValuesToDictionnary();
+        player.TargetSendInstantiatedCard(player.connectionToClient, card);
 
     }
 

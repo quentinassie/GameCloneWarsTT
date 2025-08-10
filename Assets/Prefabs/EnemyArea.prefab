@@ -69,7 +69,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: -271350517650927684, guid: 43305ad653b53c04e9568cb7ac1d8783, type: 3}
+  m_Sprite: {fileID: -5796252372939824953, guid: 89ec8a1a98f0a444893b107f3b52d865, type: 3}
   m_Type: 0
   m_PreserveAspect: 1
   m_FillCenter: 1
@@ -161,11 +161,10 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7648632433808760559}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 8ead80b16feb64c4b9dd07cea7e356ab, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  oscillationSpeed: 0.5
-  minAlpha: 0.4
-  maxAlpha: 1
+  brightnessAmplitude: 0.3
+  oscillationSpeed: 2

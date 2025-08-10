@@ -69,7 +69,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: -7614270963478610855, guid: 25ca0f8c6a1cc0e4891669c9503a7092, type: 3}
+  m_Sprite: {fileID: -5232373894345527482, guid: e9db6bd504f35ba44aebbb53162b202b, type: 3}
   m_Type: 0
   m_PreserveAspect: 1
   m_FillCenter: 1
@@ -166,6 +166,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8ead80b16feb64c4b9dd07cea7e356ab, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  oscillationSpeed: 0.5
-  minAlpha: 0.4
-  maxAlpha: 1
+  brightnessAmplitude: 0.2
+  oscillationSpeed: 0.8

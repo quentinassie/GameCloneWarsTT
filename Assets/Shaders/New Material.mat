@@ -59,7 +59,7 @@ Material:
     - _WaveSpeed: 0.9
     m_Colors:
     - _Color: {r: 1, g: 1, b: 1, a: 1}
-    - _ColorTint: {r: 0, g: 0.89579225, b: 1, a: 1}
+    - _ColorTint: {r: 1, g: 1, b: 1, a: 1}
     - _Flip: {r: 1, g: 1, b: 1, a: 1}
     - _GlowColor: {r: 0.29999998, g: 0.6, b: 1, a: 1}
     - _RendererColor: {r: 1, g: 1, b: 1, a: 1}

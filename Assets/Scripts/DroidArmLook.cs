@@ -10,7 +10,6 @@ public class DroidArmLook : MonoBehaviour
     [SerializeField] private Image armShadedImage;
     [SerializeField] private float fadeDuration = 0.05f;
 
-    private float angle = 0f;
     private Coroutine currentRotation;
     private Coroutine fadeRoutine;
 

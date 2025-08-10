@@ -7,7 +7,7 @@ public class XanduWingFlap : MonoBehaviour
     [SerializeField] private Transform wingLeftBase;
 
     [SerializeField] private Vector3 wingScaleVariation = new Vector3(0.15f, 0.25f, 0f);
-    [SerializeField] private float positionAmplitude = 0.02f;
+
 
     private float initialLeftZ;
     private float initialRightZ;

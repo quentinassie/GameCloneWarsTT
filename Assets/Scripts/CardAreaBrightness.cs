@@ -2,20 +2,16 @@ using UnityEngine;
 using UnityEngine.UI;
 
 /// <summary>
-/// Fait osciller la luminance d'une image UI (Canvas Overlay) sans modifier la transparence.
-/// Idéal pour un style Clone Wars avec effets lumineux.
+/// Applique une oscillation sinusoïdale directe sur la luminance d'une Image UI.
 /// </summary>
 [RequireComponent(typeof(Image))]
 public class CardAreaBrightness : MonoBehaviour
 {
-    [Tooltip("Vitesse de l'oscillation.")]
-    public float oscillationSpeed = 0.5f;
+    [Tooltip("Amplitude du facteur de luminance (autour de 1.0).")]
+    public float brightnessAmplitude = 0.3f;
 
-    [Tooltip("Facteur de luminance minimum (1 = normal).")]
-    public float minBrightness = 0.7f;
-
-    [Tooltip("Facteur de luminance maximum (1 = normal).")]
-    public float maxBrightness = 1.3f;
+    [Tooltip("Vitesse de l'oscillation (Hz).")]
+    public float oscillationSpeed = 1.0f;
 
     private Image uiImage;
     private Color baseColor;
@@ -28,13 +24,15 @@ public class CardAreaBrightness : MonoBehaviour
 
     void Update()
     {
-        float brightness = Mathf.Lerp(minBrightness, maxBrightness, (Mathf.Sin(Time.time * oscillationSpeed) + 1f) / 2f);
+        float brightness = 0.8f + Mathf.Sin(Time.time * Mathf.PI * 2f * oscillationSpeed) * brightnessAmplitude;
+
         Color newColor = new Color(
             Mathf.Clamp01(baseColor.r * brightness),
             Mathf.Clamp01(baseColor.g * brightness),
             Mathf.Clamp01(baseColor.b * brightness),
             baseColor.a
         );
+
         uiImage.color = newColor;
     }
 }

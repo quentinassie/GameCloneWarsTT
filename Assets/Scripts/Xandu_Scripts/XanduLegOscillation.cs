@@ -2,10 +2,6 @@ using UnityEngine;
 
 public class XanduLegOscillation : MonoBehaviour
 {
-    [SerializeField] private float amplitude = 0.05f; // amplitude du mouvement
-    [SerializeField] private float frequency = 2f; // fréquence des oscillations
-    [SerializeField] private Vector3 direction = Vector3.up; // direction du mouvement
-
     private Vector3 initialPosition;
 
     void Start()

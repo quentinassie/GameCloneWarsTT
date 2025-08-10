@@ -65,7 +65,7 @@ TextureImporter:
   spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
   alphaIsTransparency: 1
-  spriteTessellationDetail: -1
+  spriteTessellationDetail: 0
   textureType: 8
   textureShape: 1
   singleChannelComponent: 0
@@ -130,7 +130,7 @@ TextureImporter:
         width: 814
         height: 752
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
       physicsShape: []
@@ -151,7 +151,7 @@ TextureImporter:
         width: 817
         height: 744
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
       physicsShape: []
@@ -172,7 +172,7 @@ TextureImporter:
         width: 823
         height: 752
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
       physicsShape: []
@@ -193,7 +193,7 @@ TextureImporter:
         width: 814
         height: 744
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
       physicsShape: []
@@ -205,11 +205,36 @@ TextureImporter:
       indices: 
       edges: []
       weights: []
-    outline: []
+    outline:
+    - - {x: 785.80176, y: -730.6667}
+      - {x: 1271.1499, y: -104.888885}
+      - {x: 1271.1499, y: 44.444443}
+      - {x: 1270.4679, y: 45.9949}
+      - {x: 1271.1499, y: 46.22222}
+      - {x: 1271.1499, y: 53.333332}
+      - {x: 1267.5942, y: 56.88889}
+      - {x: 1265.8164, y: 56.88889}
+      - {x: 1265.7191, y: 56.791557}
+      - {x: 1082.6997, y: 472.8889}
+      - {x: 723.57764, y: 753.7778}
+      - {x: 456.90283, y: 753.7778}
+      - {x: 444.458, y: 743.1111}
+      - {x: 444.458, y: -638.2222}
+      - {x: 609.7964, y: -746.6667}
+      - {x: 654.2422, y: -746.6667}
+    - - {x: -440.90234, y: -680.8889}
+      - {x: -440.90234, y: 602.6667}
+      - {x: -570.6841, y: 746.6667}
+      - {x: -864.02637, y: 746.6667}
+      - {x: -1280.0391, y: 85.333336}
+      - {x: -1280.0391, y: -206.22223}
+      - {x: -1079.144, y: -480}
+      - {x: -732.4668, y: -753.7778}
+      - {x: -522.6826, y: -753.7778}
     physicsShape: []
     bones: []
     spriteID: 5e97eb03825dee720800000000000000
-    internalID: 0
+    internalID: 1537655665
     vertices: []
     indices: 
     edges: []

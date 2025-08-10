@@ -63,30 +63,21 @@ Shader "Custom/HoloRippleSafe"
                 float2 uv = i.uv;
                 float2 center = float2(0.5, 0.5);
 
-                // Lecture alpha d’origine pour déterminer si pixel visible
                 float baseAlpha = tex2D(_MainTex, uv).a;
-
-                // Si le pixel est transparent, on ne fait rien
                 if (baseAlpha < 0.01)
-                    return float4(0, 0, 0, 0);
+                    discard;
 
-                // Calcul du ripple circulaire
                 float dist = distance(uv, center);
-                float ripple = sin(dist * _WaveFrequency - _Time.y * _WaveSpeed) * _WaveAmplitude-0.01;
-
-                // Appliquer déformation limitée à la zone visible
+                float ripple = sin(dist * _WaveFrequency - _Time.y * _WaveSpeed) * _WaveAmplitude - 0.01;
                 float2 offset = normalize(uv - center) * ripple;
                 float2 distortedUV = uv + offset;
 
-                // Échantillonner texture avec UV modifiées
                 fixed4 col = tex2D(_MainTex, distortedUV) * _ColorTint;
 
-                // Conserver alpha original pour ne pas dépasser les bords
-                col.a = baseAlpha;
-
-                // Appliquer pulsation douce
                 float pulse = 1.0 - (_PulseStrength * abs(sin(_Time.y * _PulseSpeed)));
-                col.a *= pulse;
+
+                // Appliquer alpha final = alpha texture * alpha couleur * pulsation
+                col.a = baseAlpha * _ColorTint.a * pulse;
 
                 return col;
             }
