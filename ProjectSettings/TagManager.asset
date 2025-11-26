@@ -21,6 +21,9 @@ TagManager:
   - HEX_PLAYER
   - HEX_ENEMY
   - TEXT_EFFECTS
+  - DOT_SHOCK
+  - RED_CROSS
+  - LIFE_GAUGE
   layers:
   - Default
   - TransparentFX

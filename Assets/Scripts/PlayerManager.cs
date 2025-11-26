@@ -34,7 +34,14 @@ public class PlayerManager : NetworkBehaviour
     "Rancor",
     "MagnaGuard",
     "Yoda",
-    "NuteGunray"
+    "NuteGunray",
+    "AdmiralYularen",
+    "R2D2",
+    "C3PO",
+    "ChancelerPalpatine",
+    "LuminaraUnduli",
+    "JarJarBinks"
+    
     // etc. → exactement les noms des prefabs dans Resources/Cards/
 };
 
@@ -57,7 +64,10 @@ public class PlayerManager : NetworkBehaviour
     //UI
     private Color32 targetColor = new Color32(0x00, 0x8D, 0xFF, 0xD7); // bleu ciel (#008DFF)
 
-    private Color32 targetColor2 = new Color32(255, 62, 98, 215);
+    private Color32 targetColor2 = new Color32(255, 158, 0, 215);
+    [SerializeField] private ShockwaveDotController dotShock;
+    private UIDrawCross redCross;
+    private LifeGauge lifeGauge;
 
 
 
@@ -244,6 +254,7 @@ public class PlayerManager : NetworkBehaviour
         RpcCleanFluid();
         RpcResetMyTurn();
         RpcCleanLocalPlayer();
+        RpcResetLifeGauge(cardPrefabNames.Count / 2);
 
         StartCoroutine(DelayedStopHost());
     }
@@ -260,8 +271,9 @@ public class PlayerManager : NetworkBehaviour
         HexPlayer = GameObject.FindWithTag("HEX_PLAYER");
         HexEnemy = GameObject.FindWithTag("HEX_ENEMY");
         textEffects = GameObject.FindWithTag("TEXT_EFFECTS");
-
-
+        dotShock = GameObject.FindWithTag("DOT_SHOCK").GetComponent<ShockwaveDotController>();
+        redCross = GameObject.FindWithTag("RED_CROSS").GetComponent<UIDrawCross>();
+        lifeGauge = GameObject.FindWithTag("LIFE_GAUGE").GetComponent<LifeGauge>();
 
 
         playersByNetId[netId] = this;
@@ -543,11 +555,14 @@ public class PlayerManager : NetworkBehaviour
 
         //HexPlayer.GetComponent<HexSequence>().StartHexFillSequence();
 
+
         //maj de la valeur de la skill choisie 
         if (isWinner)
         {
             textEffects.GetComponent<TextEffects>().AnimTextPlayer(valueWin);
             yield return new WaitForSeconds(1.5f);
+            // onde côté gagnant
+
         }
         else if (!isWinner)
         {
@@ -572,20 +587,39 @@ public class PlayerManager : NetworkBehaviour
 
         CmdAnimateCard("Enemy");//animation zoom
 
-        yield return new WaitForSeconds(1.5f);
+        yield return new WaitForSeconds(1.0f);
 
         if (isWinner)
         {
-            instantiatedCard[0].GetComponent<DragDrop>().AnimationZoom(10f);
-            //CmdAnimateCard("PlayerWinner");
-            yield return new WaitForSeconds(2f);
+            redCross.PlayEnemy();
 
         }
         else if (!isWinner)
         {
-            CmdAnimateCard("EnemyWinner");
-            yield return new WaitForSeconds(2f);
+            redCross.PlayPlayer();
         }
+
+        yield return new WaitForSeconds(0.5f);
+
+        if (isWinner)
+        {
+            instantiatedCard[0].GetComponent<DragDrop>().AnimationZoom(10f); // la carte « tombe » pour le gagnant local
+            if (dotShock != null) dotShock.TriggerPlayer();                   // CHANGED: onde côté player
+            yield return new WaitForSeconds(2f);
+            lifeGauge.DeltaCurrentPlayer(+1);
+            lifeGauge.DeltaCurrentEnemy(-1);
+
+        }
+        else
+        {
+            CmdAnimateCard("EnemyWinner");            // la carte adverse « tombe » (gagnante)
+            if (dotShock != null) dotShock.TriggerEnemy(); // CHANGED: onde côté enemy
+            yield return new WaitForSeconds(2f);
+            lifeGauge.DeltaCurrentPlayer(-1);
+            lifeGauge.DeltaCurrentEnemy(+1);
+        }
+
+
 
         if (isWinner)
         {
@@ -665,6 +699,13 @@ public class PlayerManager : NetworkBehaviour
     void RpcCleanLocalPlayer()
     {
         CleanupLocalPlayer();
+    }
+
+    [ClientRpc]
+    void RpcResetLifeGauge(int count)
+    {
+        lifeGauge.SetCurrent(count);
+        lifeGauge.SetEnemyCurrent(count);
     }
 
     [TargetRpc]

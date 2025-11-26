@@ -34,6 +34,46 @@ public sealed class UIBulletDropEffect : MonoBehaviour
     private Canvas _canvas;
     private Camera _eventCam; // null en Overlay
 
+    // --- Auto-destruction locale, robuste même si le spawner est désactivé ---
+    private sealed class AutoKillAfter : MonoBehaviour
+    {
+        public Transform requiredParent;
+        public float seconds = 0.5f;
+        public bool useRealtime = true;
+
+        private float _t0;
+        public void Init(Transform parent, float sec, bool realtime)
+        {
+            requiredParent = parent;
+            seconds = sec;
+            useRealtime = realtime;
+            _t0 = useRealtime ? Time.realtimeSinceStartup : Time.time;
+        }
+
+        private void OnEnable()
+        {
+            // sécurité si ajouté sans Init
+            if (_t0 <= 0f) _t0 = useRealtime ? Time.realtimeSinceStartup : Time.time;
+        }
+
+        private void Update()
+        {
+            float now = useRealtime ? Time.realtimeSinceStartup : Time.time;
+            if (now - _t0 < seconds) return;
+
+            // WHY: ne détruire que si toujours enfant du parent "fluid"
+            if (requiredParent == null || transform.parent == requiredParent)
+            {
+                Destroy(gameObject);
+            }
+            else
+            {
+                // a été réparenté: on n'impose plus le kill
+                Destroy(this);
+            }
+        }
+    }
+
     private void Awake()
     {
         _self = GetComponent<RectTransform>();
@@ -43,7 +83,6 @@ public sealed class UIBulletDropEffect : MonoBehaviour
         if (_canvas != null)
             _eventCam = _canvas.renderMode == RenderMode.ScreenSpaceOverlay ? null : _canvas.worldCamera;
 
-        // reçoit les clics si jamais tu actives un EventSystem plus tard
         if (_selfImage != null) _selfImage.raycastTarget = true;
 
         if (bubbleSprite == null && _selfImage != null) bubbleSprite = _selfImage.sprite;
@@ -52,12 +91,9 @@ public sealed class UIBulletDropEffect : MonoBehaviour
 
     private void Update()
     {
-        // Fonctionne même sans EventSystem/GraphicRaycaster (ScreenSpace-Overlay)
         if (Input.GetMouseButtonDown(0))
-        {
             TryManualHit(Input.mousePosition);
-        }
-        // Support tactile simple (premier doigt)
+
         if (Input.touchCount > 0)
         {
             Touch t = Input.GetTouch(0);
@@ -69,13 +105,10 @@ public sealed class UIBulletDropEffect : MonoBehaviour
     private void TryManualHit(Vector2 screenPos)
     {
         RectTransform parent = parentOverride != null ? parentOverride : _self;
-        if (RectTransformUtility.RectangleContainsScreenPoint(_self, screenPos, _eventCam))
+        if (RectTransformUtility.RectangleContainsScreenPoint(_self, screenPos, _eventCam) &&
+            RectTransformUtility.ScreenPointToLocalPointInRectangle(parent, screenPos, _eventCam, out Vector2 local))
         {
-            Vector2 local;
-            if (RectTransformUtility.ScreenPointToLocalPointInRectangle(parent, screenPos, _eventCam, out local))
-            {
-                SpawnAtLocal(parent, local);
-            }
+            SpawnAtLocal(parent, local);
         }
     }
 
@@ -102,7 +135,7 @@ public sealed class UIBulletDropEffect : MonoBehaviour
 
         Image img = go.GetComponent<Image>();
         img.sprite = bubbleSprite;
-        img.raycastTarget = false; // ne capture pas les clics suivants
+        img.raycastTarget = false;
         img.color = bubbleColor;
 
         StartCoroutine(AnimBubble(img, rt));
@@ -123,7 +156,12 @@ public sealed class UIBulletDropEffect : MonoBehaviour
         img.raycastTarget = false;
         img.color = ringColor;
 
+        // Anim
         StartCoroutine(AnimRing(img, rt));
+
+        // Watchdog autonome sur l'objet (0.5s non-scalé)
+        var watchdog = go.AddComponent<AutoKillAfter>();
+        watchdog.Init(parent, 0.5f, true);
     }
 
     private IEnumerator AnimBubble(Image img, RectTransform rt)
@@ -147,26 +185,22 @@ public sealed class UIBulletDropEffect : MonoBehaviour
             float k = Mathf.Clamp01(t / dur);
             float ease = Mathf.SmoothStep(0f, 1f, k);
 
-            float s;
-            if (k < 0.35f)
-                s = Mathf.Lerp(startScale, peakScale, k / 0.35f);
-            else
-                s = Mathf.Lerp(peakScale, endScale, (k - 0.35f) / 0.65f);
+            float s = (k < 0.35f)
+                ? Mathf.Lerp(startScale, peakScale, k / 0.35f)
+                : Mathf.Lerp(peakScale, endScale, (k - 0.35f) / 0.65f);
 
             rt.localScale = Vector3.one * s;
             rt.anchoredPosition = Vector2.Lerp(startPos, endPos, ease);
 
-            Color c;
-            if (k < 0.7f)
-                c = Color.Lerp(c0, c1, k / 0.7f);
-            else
-                c = Color.Lerp(c1, c2, (k - 0.7f) / 0.3f);
+            Color c = (k < 0.7f)
+                ? Color.Lerp(c0, c1, k / 0.7f)
+                : Color.Lerp(c1, c2, (k - 0.7f) / 0.3f);
 
             img.color = c;
             rt.sizeDelta = Vector2.one * Mathf.Lerp(bubbleMaxSize * 0.4f, bubbleMaxSize, ease);
             yield return null;
         }
-        Object.Destroy(rt.gameObject);
+        if (rt != null) Object.Destroy(rt.gameObject);
     }
 
     private IEnumerator AnimRing(Image img, RectTransform rt)
@@ -188,6 +222,6 @@ public sealed class UIBulletDropEffect : MonoBehaviour
 
             yield return null;
         }
-        Object.Destroy(rt.gameObject);
+        if (rt != null) Object.Destroy(rt.gameObject);
     }
 }

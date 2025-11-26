@@ -85,5 +85,59 @@ public class Card : MonoBehaviour
             SetTechniquesDeCombat(32);
             SetPouvoirJedi(10);
         }
+        else if (name.Contains("JarJarBinks"))
+        {
+            SetCourage(16);
+            SetRuse(32);
+            SetAutorite(78);
+            SetAptitudeAuCombat(84);
+            SetTechniquesDeCombat(23);
+            SetPouvoirJedi(3);
+        }
+        else if (name.Contains("AdmiralYularen"))
+        {
+            SetCourage(20);
+            SetRuse(37);
+            SetAutorite(82);
+            SetAptitudeAuCombat(99);
+            SetTechniquesDeCombat(70);
+            SetPouvoirJedi(5);
+        }
+        else if (name.Contains("LuminaraUnduli"))
+        {
+            SetCourage(20);
+            SetRuse(34);
+            SetAutorite(80);
+            SetAptitudeAuCombat(124);
+            SetTechniquesDeCombat(24);
+            SetPouvoirJedi(6);
+        }
+        else if (name.Contains("C3PO"))
+        {
+            SetCourage(12);
+            SetRuse(22);
+            SetAutorite(58);
+            SetAptitudeAuCombat(62);
+            SetTechniquesDeCombat(30);
+            SetPouvoirJedi(3);
+        }
+        else if (name.Contains("ChancelerPalpatine"))
+        {
+            SetCourage(16);
+            SetRuse(48);
+            SetAutorite(92);
+            SetAptitudeAuCombat(133);
+            SetTechniquesDeCombat(28);
+            SetPouvoirJedi(9);
+        }
+        else if (name.Contains("R2D2"))
+        {
+            SetCourage(16);
+            SetRuse(27);
+            SetAutorite(42);
+            SetAptitudeAuCombat(76);
+            SetTechniquesDeCombat(64);
+            SetPouvoirJedi(3);
+        }
     }
 }

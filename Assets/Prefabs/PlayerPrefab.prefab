@@ -105,8 +105,8 @@ MonoBehaviour:
   Canvas: {fileID: 0}
   backCardPrefab: {fileID: 5305778083515227010, guid: 2f1c2e2477fb32d4aaf14d2d18d5630a, type: 3}
   ButtonLeaveClient: {fileID: 0}
-  text_choisit: {fileID: 8400350656466161523, guid: 0c700a3d673ae17449643d81c413103b, type: 3}
-  LightLine: {fileID: 0}
+  speechBubbleText: {fileID: 0}
+  speechBubbleUI: {fileID: 0}
   cardPrefabNames:
   - MaceWindu
   - Ziro
@@ -114,6 +114,12 @@ MonoBehaviour:
   - MagnaGuard
   - Yoda
   - NuteGunray
+  - JarJarBinks
+  - AdmiralYularen
+  - LuminaraUnduli
+  - ChancelerPalpatine
+  - C3PO
+  - R2D2
   buttonsSkillsPrefabs:
   - {fileID: 5131002000467017062, guid: c32372455485ede48bb9d3af5c8e29cc, type: 3}
   - {fileID: 3328821493809741224, guid: 87a54c268a8b5a245bbf4538604cd0bc, type: 3}
@@ -123,3 +129,4 @@ MonoBehaviour:
   - {fileID: 213282651772136139, guid: 3b1bf31df5f803d4e934c0416567ee9c, type: 3}
   instantiatedCard: []
   myTurn: 0
+  dotShock: {fileID: 0}
